@@ -1,0 +1,28 @@
+# Core FastAPI
+fastapi
+uvicorn[standard]
+gunicorn
+python-multipart
+
+# Pydantic & AI
+pydantic
+pydantic-settings
+pydantic-ai
+
+# OpenAI & LangChain
+openai
+langchain-community
+langchain-text-splitters
+langchain-openai
+
+# Supabase & Database
+supabase
+vecs
+psycopg2-binary
+
+# Document Parsing
+PyPDF2
+python-docx
+
+# Utilities
+python-dotenv
