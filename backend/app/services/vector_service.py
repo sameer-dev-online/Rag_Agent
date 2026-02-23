@@ -1,6 +1,6 @@
-import vecs
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from openai import OpenAI
+from supabase import create_client, Client
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.config import settings
@@ -9,15 +9,18 @@ from app.core.exceptions import VectorStoreException
 
 class VectorService:
     """
-    Service for vector operations using Supabase vecs library.
+    Service for vector operations using native pgvector via supabase-py.
     Handles document chunking, embedding generation, and similarity search.
     """
 
     def __init__(self):
-        """Initialize VectorService with vecs client and OpenAI client."""
+        """Initialize VectorService with Supabase client and OpenAI client."""
         try:
-            # Initialize vecs client
-            self.vx = vecs.create_client(settings.database_url)
+            # Initialize Supabase client with service role key for full access
+            self.supabase: Client = create_client(
+                settings.supabase_url,
+                settings.supabase_service_role_key
+            )
 
             # Initialize OpenAI client for embeddings
             self.openai_client = OpenAI(api_key=settings.openai_api_key)
@@ -30,33 +33,9 @@ class VectorService:
                 separators=["\n\n", "\n", ". ", " ", ""]
             )
 
-            # Get or create the document embeddings collection
-            self.collection = self._get_or_create_collection()
-
         except Exception as e:
             raise VectorStoreException(
                 message=f"Failed to initialize VectorService: {str(e)}",
-                details={"error": str(e)}
-            )
-
-    def _get_or_create_collection(self):
-        """Get existing collection or create a new one."""
-        try:
-            # Try to get existing collection
-            collections = self.vx.list_collections()
-            collection_name = "document_embeddings"
-
-            if collection_name in [c.name for c in collections]:
-                return self.vx.get_collection(name=collection_name)
-            else:
-                # Create new collection with specified dimension
-                return self.vx.create_collection(
-                    name=collection_name,
-                    dimension=settings.embedding_dimension
-                )
-        except Exception as e:
-            raise VectorStoreException(
-                message=f"Failed to get or create collection: {str(e)}",
                 details={"error": str(e)}
             )
 
@@ -105,7 +84,7 @@ class VectorService:
         self,
         document_id: str,
         text: str,
-        metadata: Dict[str, Any] = None
+        metadata: Optional[Dict[str, Any]] = None
     ) -> int:
         """
         Chunk text, generate embeddings, and store in vector database.
@@ -119,32 +98,34 @@ class VectorService:
             Number of chunks created
         """
         try:
+            # Delete existing embeddings for this document (idempotent)
+            self.delete_document_embeddings(document_id)
+
             # Chunk the text
             chunks = self.chunk_text(text)
 
-            # Prepare records for insertion
+            if not chunks:
+                return 0
+
+            # Prepare records for batch insertion
             records = []
             for idx, chunk in enumerate(chunks):
                 # Generate embedding
                 embedding = self._generate_embedding(chunk)
 
-                # Prepare metadata
-                chunk_metadata = {
+                # Prepare record
+                record = {
                     "document_id": document_id,
                     "chunk_index": idx,
                     "chunk_text": chunk,
-                    **(metadata or {})
+                    "embedding": embedding,
+                    "metadata": metadata or {}
                 }
+                records.append(record)
 
-                # Create record with unique ID
-                record_id = f"{document_id}_{idx}"
-                records.append((record_id, embedding, chunk_metadata))
-
-            # Upsert records to collection
+            # Batch insert all records
             if records:
-                self.collection.upsert(records=records)
-                # Create index if it doesn't exist (for performance)
-                self.collection.create_index()
+                self.supabase.table("embeddings").insert(records).execute()
 
             return len(chunks)
 
@@ -157,16 +138,16 @@ class VectorService:
     def similarity_search(
         self,
         query: str,
-        top_k: int = None,
-        filter_metadata: Dict[str, Any] = None
+        top_k: Optional[int] = None,
+        filter_metadata: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Any]]:
         """
-        Search for similar chunks using vector similarity.
+        Search for similar chunks using vector similarity via RPC function.
 
         Args:
             query: Search query text
             top_k: Number of results to return (defaults to settings.top_k_retrieval)
-            filter_metadata: Optional metadata filters
+            filter_metadata: Optional metadata filters (supports user_id and document_id)
 
         Returns:
             List of matching chunks with metadata and similarity scores
@@ -179,25 +160,35 @@ class VectorService:
             if top_k is None:
                 top_k = settings.top_k_retrieval
 
-            # Perform similarity search
-            results = self.collection.query(
-                data=query_embedding,
-                limit=top_k,
-                filters=filter_metadata,
-                include_value=True,
-                include_metadata=True
-            )
+            # Extract filter values
+            filter_user_id = None
+            filter_document_id = None
+            if filter_metadata:
+                filter_user_id = filter_metadata.get("user_id")
+                filter_document_id = filter_metadata.get("document_id")
 
-            # Format results
+            # Call RPC function for similarity search
+            result = self.supabase.rpc(
+                "match_embeddings",
+                {
+                    "query_embedding": query_embedding,
+                    "match_count": top_k,
+                    "filter_document_id": filter_document_id,
+                    "filter_user_id": filter_user_id,
+                    "match_threshold": 0.0
+                }
+            ).execute()
+
+            # Format results to match expected interface
             formatted_results = []
-            for record_id, distance, metadata in results:
+            for row in result.data or []:
                 formatted_results.append({
-                    "id": record_id,
-                    "similarity_score": float(1 - distance),  # Convert distance to similarity
-                    "chunk_text": metadata.get("chunk_text", ""),
-                    "document_id": metadata.get("document_id", ""),
-                    "chunk_index": metadata.get("chunk_index", 0),
-                    "metadata": metadata
+                    "id": row["id"],
+                    "similarity_score": float(row["similarity"]),
+                    "chunk_text": row["chunk_text"],
+                    "document_id": row["document_id"],
+                    "chunk_index": row["chunk_index"],
+                    "metadata": row["metadata"]
                 })
 
             return formatted_results
@@ -216,8 +207,9 @@ class VectorService:
             document_id: Document ID to delete embeddings for
         """
         try:
-            # Delete by filtering on document_id in metadata
-            self.collection.delete(filters={"document_id": {"$eq": document_id}})
+            self.supabase.table("embeddings").delete().eq(
+                "document_id", document_id
+            ).execute()
         except Exception as e:
             raise VectorStoreException(
                 message=f"Failed to delete document embeddings: {str(e)}",

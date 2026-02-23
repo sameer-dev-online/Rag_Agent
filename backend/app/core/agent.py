@@ -10,15 +10,12 @@ from dataclasses import dataclass
 # Define dependencies type for the agent
 @dataclass
 class AgentDeps:
+    
     """Dependencies passed to the agent during runtime."""
+    retrieved_contexts: List[Dict[str, Any]]
+    conversation_history: List[Dict[str, Any]]
 
-    def __init__(
-        self,
-        retrieved_contexts: List[Dict[str, Any]],
-        conversation_history: List[Dict[str, Any]],
-    ):
-        self.retrieved_contexts = retrieved_contexts
-        self.conversation_history = conversation_history
+   
 
 
 # System prompt for the RAG agent
@@ -98,7 +95,6 @@ def create_rag_agent(
         Configured PydanticAI agent
     """
     try:
-        print(f"model name: {settings.llm_model}")
         # Initialize OpenAI model
         model = OpenAIChatModel(
             model_name=settings.llm_model,
@@ -109,7 +105,7 @@ def create_rag_agent(
             model=model,
             deps_type=AgentDeps,
             system_prompt=_build_system_prompt(
-                AgentDeps(retrieved_contexts, conversation_history)
+                retrieved_contexts, conversation_history
             ),
         )
 
@@ -121,7 +117,7 @@ def create_rag_agent(
         )
 
 
-def _build_system_prompt(ctx: RunContext[AgentDeps]) -> str:
+def _build_system_prompt(retrieved_contexts,conversation_history) -> str:
     """
     Build the system prompt with context and history.
 
@@ -131,8 +127,8 @@ def _build_system_prompt(ctx: RunContext[AgentDeps]) -> str:
     Returns:
         Formatted system prompt
     """
-    context_str = format_context(ctx.deps.retrieved_contexts)
-    history_str = format_history(ctx.deps.conversation_history)
+    context_str = format_context(retrieved_contexts)
+    history_str = format_history(conversation_history)
 
     return SYSTEM_PROMPT.format(context=context_str, history=history_str)
 
@@ -161,13 +157,13 @@ async def run_agent(
         agent = create_rag_agent(retrieved_contexts, conversation_history)
 
         # Create dependencies
-        Deps = AgentDeps(
-            retrieved_contexts=retrieved_contexts,
-            conversation_history=conversation_history,
+        deps = AgentDeps(
+            retrieved_contexts,
+            conversation_history,
         )
 
         # Run agent
-        result = await agent.run(query, deps=Deps)
+        result = await agent.run(query, deps=deps)
 
         return result.output
 

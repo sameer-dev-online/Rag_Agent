@@ -17,7 +17,6 @@ langchain-openai
 
 # Supabase & Database
 supabase
-vecs
 psycopg2-binary
 
 # Document Parsing

@@ -72,7 +72,7 @@ class RAGService:
             conversation_history = self.memory_service.get_recent_messages(
                 conversation_id=conversation_id
             )
-
+           
             # Step 4: Store user message
             user_message = self.memory_service.create_message(
                 conversation_id=conversation_id,
