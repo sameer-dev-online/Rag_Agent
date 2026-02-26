@@ -1,0 +1,18 @@
+import { cn } from '@/lib/utils';
+
+interface LoadingSpinnerProps {
+  text?: string;
+  className?: string;
+}
+
+/**
+ * Reusable loading spinner with optional text
+ */
+export function LoadingSpinner({ text, className }: LoadingSpinnerProps) {
+  return (
+    <div className={cn('flex flex-col items-center justify-center gap-4', className)}>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+      {text && <p className="text-sm text-gray-400">{text}</p>}
+    </div>
+  );
+}
