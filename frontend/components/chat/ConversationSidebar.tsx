@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -31,19 +31,21 @@ export function ConversationSidebar({
 }: ConversationSidebarProps) {
   const [conversations, setConversations] = useState<LocalConversation[]>([]);
 
-  // Load conversations on mount and when active conversation changes
-  useEffect(() => {
-    loadConversations();
-  }, [activeConversationId]);
-
-  const loadConversations = () => {
+  const loadConversations = useCallback(() => {
     const convs = LocalStorage.getConversations();
     // Sort by updated_at descending
     const sorted = convs.sort(
       (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     );
     setConversations(sorted);
-  };
+  }, []);
+
+  // Load conversations on mount and when active conversation changes
+  useEffect(() => {
+    (()=>{
+      loadConversations();
+    }) ();
+  }, [activeConversationId, loadConversations]);
 
   const handleDelete = (conversationId: string, e: React.MouseEvent) => {
     e.stopPropagation();

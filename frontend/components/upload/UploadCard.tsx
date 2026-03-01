@@ -100,15 +100,16 @@ export function UploadCard({ userId }: UploadCardProps) {
         );
 
         toast.success(`${file.name} uploaded successfully`);
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Mark as error
+        const errorMessage = error instanceof Error ? error.message : 'Upload failed';
         setUploads((prev) =>
           prev.map((upload, idx) =>
             idx === i
               ? {
                   ...upload,
                   status: 'error',
-                  error: error.message || 'Upload failed',
+                  error: errorMessage,
                 }
               : upload
           )
@@ -127,7 +128,7 @@ export function UploadCard({ userId }: UploadCardProps) {
       <CardHeader>
         <CardTitle>Upload Documents</CardTitle>
         <CardDescription>
-          Upload PDF, TXT, or DOCX files to enhance the AI's knowledge base
+          Upload PDF, TXT, or DOCX files to enhance the AI&apos;s knowledge base
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -11,7 +11,7 @@ export interface Message {
   conversation_id: string;
   role: MessageRole;
   content: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
 }
 
@@ -34,7 +34,7 @@ export interface RetrievedContext {
   document_id: string;
   chunk_id: string;
   similarity_score: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

@@ -4,7 +4,7 @@ import { apiClient } from '@/lib/api';
 import { LocalStorage } from '@/lib/storage';
 import { generateTempId, generateConversationTitle } from '@/lib/utils';
 import { DEFAULTS } from '@/lib/constants';
-import type { Message, OptimisticMessage, APIError } from '@/types';
+import type { Message, APIError } from '@/types';
 
 /**
  * Core chat logic with optimistic updates

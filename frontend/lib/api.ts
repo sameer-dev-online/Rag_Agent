@@ -52,7 +52,7 @@ class APIClient {
   private transformError(error: AxiosError): APIError {
     if (error.response) {
       // Server responded with error status
-      const data = error.response.data as any;
+      const data = error.response.data as { message?: string; detail?: string; type?: string };
       return {
         message: data?.message || data?.detail || DEFAULTS.ERROR_MESSAGE,
         status: error.response.status,
