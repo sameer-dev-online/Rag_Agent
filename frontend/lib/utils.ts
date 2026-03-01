@@ -66,7 +66,7 @@ export function getFileExtension(filename: string): string {
 /**
  * Validates file MIME type against allowed types
  */
-export function isValidFileType(file: File, acceptedTypes: Record<string, string[]>): boolean {
+export function isValidFileType(file: File, acceptedTypes: any): boolean {
   return file.type in acceptedTypes
 }
 
