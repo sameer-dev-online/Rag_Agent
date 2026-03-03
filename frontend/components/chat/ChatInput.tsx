@@ -51,8 +51,8 @@ export function ChatInput({
   };
 
   return (
-    <div className="border-t border-gray-800 bg-gray-900 p-4">
-      <div className="flex items-end gap-2 max-w-4xl mx-auto">
+    <div className="border-t border-gray-800 bg-gray-900 p-3 sm:p-4">
+      <div className="flex items-end gap-2 max-w-4xl mx-auto w-full">
         <Textarea
           ref={textareaRef}
           value={value}
@@ -62,11 +62,16 @@ export function ChatInput({
           disabled={disabled}
           rows={1}
           className={cn(
-            'resize-none max-h-32 min-h-[44px]',
+            'resize-none max-h-32 min-h-[44px] text-sm sm:text-base',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
         />
-        <Button onClick={handleSend} disabled={!value.trim() || disabled} size="icon">
+        <Button
+          onClick={handleSend}
+          disabled={!value.trim() || disabled}
+          size="icon"
+          className="shrink-0"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

@@ -69,22 +69,22 @@ export function FilePreview({ file, onRemove }: FilePreviewProps) {
   };
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 border border-gray-700">
-      {getFileIcon()}
+    <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg bg-gray-800 border border-gray-700">
+      <div className="shrink-0">{getFileIcon()}</div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white truncate">{file.name}</p>
+        <p className="text-xs sm:text-sm font-medium text-white truncate">{file.name}</p>
         <p className="text-xs text-gray-400">
           {formatFileSize(file.size)} • {extension.toUpperCase()}
         </p>
       </div>
-      <Button variant="ghost" size="icon" onClick={onRemove}>
+      <Button variant="ghost" size="icon" onClick={onRemove} className="shrink-0">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={1.5}
           stroke="currentColor"
-          className="w-5 h-5"
+          className="w-4 h-4 sm:w-5 sm:h-5"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>

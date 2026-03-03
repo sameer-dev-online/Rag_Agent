@@ -21,13 +21,29 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gray-950 py-4 sm:py-6 md:py-8">
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-white">Upload Documents</h1>
-          <Link href="/chat">
-            <Button variant="outline">Back to Chat</Button>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Upload Documents</h1>
+          <Link href="/chat" className="self-start sm:self-auto">
+            <Button variant="outline" className="w-full sm:w-auto">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4 mr-2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                />
+              </svg>
+              Back to Chat
+            </Button>
           </Link>
         </div>
 

@@ -58,7 +58,7 @@ export function MessageList({ messages, isTyping = false, onRegenerateLastMessag
 
   return (
     <ScrollArea className="flex-1 h-full">
-      <div ref={scrollRef} className="flex flex-col gap-4 p-4 max-w-4xl mx-auto">
+      <div ref={scrollRef} className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 md:p-6 max-w-4xl mx-auto w-full">
         {messages.map((message, index) => (
           <MessageBubble
             key={message.id}

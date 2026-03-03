@@ -125,9 +125,9 @@ export function UploadCard({ userId }: UploadCardProps) {
 
   return (
     <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Upload Documents</CardTitle>
-        <CardDescription>
+      <CardHeader className="space-y-1 sm:space-y-2">
+        <CardTitle className="text-xl sm:text-2xl">Upload Documents</CardTitle>
+        <CardDescription className="text-sm sm:text-base">
           Upload PDF, TXT, or DOCX files to enhance the AI&apos;s knowledge base
         </CardDescription>
       </CardHeader>
@@ -136,7 +136,7 @@ export function UploadCard({ userId }: UploadCardProps) {
         <div
           {...getRootProps()}
           className={cn(
-            'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all',
+            'border-2 border-dashed rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-all',
             isDragActive
               ? 'border-blue-500 bg-blue-500/10'
               : 'border-gray-700 hover:border-gray-600 hover:bg-gray-800/50'
@@ -150,7 +150,7 @@ export function UploadCard({ userId }: UploadCardProps) {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-12 h-12 text-gray-400"
+              className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400"
             >
               <path
                 strokeLinecap="round"
@@ -158,12 +158,12 @@ export function UploadCard({ userId }: UploadCardProps) {
                 d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
               />
             </svg>
-            <p className="text-sm text-gray-300">
+            <p className="text-sm sm:text-base text-gray-300 px-4">
               {isDragActive
                 ? 'Drop files here...'
                 : 'Drag & drop files here, or click to select'}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500">
               PDF, TXT, DOCX • Max {FILE_VALIDATION.MAX_SIZE_MB}MB
             </p>
           </div>
@@ -178,7 +178,7 @@ export function UploadCard({ userId }: UploadCardProps) {
             ))}
             <button
               onClick={handleUpload}
-              className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+              className="w-full mt-4 px-4 py-2.5 sm:py-3 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium"
             >
               Upload {selectedFiles.length} {selectedFiles.length === 1 ? 'file' : 'files'}
             </button>
@@ -187,7 +187,7 @@ export function UploadCard({ userId }: UploadCardProps) {
 
         {/* Upload progress */}
         {uploads.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <h3 className="text-sm font-medium text-white">Upload Progress</h3>
             {uploads.map((upload, index) => (
               <UploadProgress key={index} upload={upload} />

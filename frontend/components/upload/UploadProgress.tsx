@@ -39,22 +39,22 @@ export function UploadProgress({ upload, onRetry }: UploadProgressProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-white">{upload.file.name}</span>
-        <span className={`text-xs ${getStatusColor()}`}>{getStatusText()}</span>
+      <div className="flex items-start sm:items-center justify-between gap-2">
+        <span className="text-xs sm:text-sm font-medium text-white truncate flex-1">{upload.file.name}</span>
+        <span className={`text-xs ${getStatusColor()} shrink-0`}>{getStatusText()}</span>
       </div>
 
       {upload.status === 'uploading' && <Progress value={upload.progress} />}
 
       {upload.status === 'success' && upload.document && (
-        <div className="flex items-center gap-4 text-xs text-gray-400">
+        <div className="flex items-center gap-3 sm:gap-4 text-xs text-gray-400">
           <span>{upload.document.num_chunks} chunks</span>
           <span>{Math.round(upload.document.content_length / 1024)} KB</span>
         </div>
       )}
 
       {upload.status === 'error' && onRetry && (
-        <Button variant="outline" size="sm" onClick={onRetry}>
+        <Button variant="outline" size="sm" onClick={onRetry} className="w-full sm:w-auto">
           Retry
         </Button>
       )}
